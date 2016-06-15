@@ -1,6 +1,6 @@
 // Menu definition
-// Copyright (c) 2015 Andreas Merkle
-// <vscp@blue-andi.de>
+// Copyright (c) 2016 Ake Hedman
+// <akhe@paradiseofthefrog.com>
 //
 // Licence:
 // The MIT License (MIT)
@@ -42,88 +42,69 @@ var navBarMenu = navBarMenu || {};
 navBarMenu.content = [
     {
         title: "Home",
-        url: "../index.html"
+        url: "index.html"
     },
     {
-        title: "Widget & general demos",
+        title: "Server",
         url: "#",
         dropDown: [
             {
-                title: "Authentication test",
+                title: "Select server",
                 url: "testauth.html"
             },
-            {
-                title: "Control events",
-                url: "event.html"
-            },
-            {
-                title: "Button widget demo",
-                url: "statebutton.html"
-            },
-            {
-                title: "Handle variables",
-                url: "variable.html"
-            },
-            {
-                title: "Passive node discovery",
-                url: "node_discovery.html"
-            },
-            {
-                title: "Slider demo",
-                url: "slider.html"
-            },
-            {
-                title: "Progress bar demo",
-                url: "progress.html"
-            },
-            {
-                title: "Simple text demo",
-                url: "simpletext.html"
-            },
-            {
-                title: "Thermometer widget demo",
-                url: "thermometercelsius.html"
-            },
-            {
-                title: "lm-sensors demo",
-                url: "lmsensors.html"
-            },
-            {
-                title: "Dynamic table demo",
-                url: "table_dynamic.html"
-            }
+            
         ]
     },
     {
-        title: "Epoch chart demos",
+        title: "Maintenance",
         url: "#",
         dropDown: [
             {
-                title: "Simple demo",
+                title: "Variables",
                 url: "epoch_simple.html"
-            }
+            },
+            {
+                title: "Decision Matrix",
+                url: "epoch_simple.html"
+            },
+            {
+                title: "MDF - Module Description Files",
+                url: "epoch_simple.html"
+            },
+            {
+                title: "Daemon Configuration",
+                url: "epoch_simple.html"
+            },
+            {
+                title: "Server logs",
+                url: "epoch_simple.html"
+            },
         ]
     },
     {
-        title: "Google Charts demos",
+        title: "Device tools",
         url: "#",
         dropDown: [
             {
-                title: "Gauge demo",
+                title: "Device Session",
                 url: "google_gauge.html"
             },
             {
-                title: "LineChart demo",
+                title: "Device configuration",
                 url: "google_line_simple.html"
             },
             {
-                title: "Table demo",
+                title: "Devices scan",
+                url: "google_table.html"
+            },
+            {
+                title: "Update device firmware",
                 url: "google_table.html"
             }
         ]
     },
     {
-        title: "REST interface demos",
+        title: "Settings",
         url: "#",
         dropDown: [
             {
