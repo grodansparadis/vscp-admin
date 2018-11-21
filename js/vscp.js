@@ -1022,7 +1022,7 @@ vscp.constants.types = {
     VSCP_TYPE_LOCAL_GENERAL: 0,
 
     ///////////////////////////////////////////////////////////////////////////////
-    //              Level II
+    //                              Level II
     ///////////////////////////////////////////////////////////////////////////////
 
     // Level II Protocol functionality Class=1024 (0x400)
@@ -1215,13 +1215,14 @@ vscp.constants.priorities = {
     PRIORITY_7_LOW: 7
 };
 
+
 /** VSCP variable types
  * @enum {number}
  * @const
  */
 vscp.constants.varTypes = {
     UNASSIGNED: 0,          // Unassigned variable
-    STRING: 1,              // String value
+    STRING: 1,              // String value (Base64 encoded)
     BOOLEAN: 2,             // Boolean value (true, false, 0 or 1)
     INTEGER: 3,             // Integer value
     LONG: 4,                // Long value
@@ -1233,31 +1234,446 @@ vscp.constants.varTypes = {
     EVENT_CLASS: 10,        // Integer value for VSCP class
     EVENT_TYPE: 11,         // Integer value for VSCP type
     EVENT_TIMESTAMP: 12,    // Time when event was received in ms
-    DATE_TIME: 13           // Date + Time in ISO format 2008-11-07 20:10.00
+    DATE_TIME: 13,          // Date + Time in ISO format 2008-11-07T20:10.00
+    DATE: 14,               //  ISO date 2008-11-07
+    TIME: 15,               //  ISO Time 20:10.00
+    BLOB: 16,               //  Base64 encoded binary data.    
+    MIME: 100,              //  Base64 mime types data base64(mimetype;data)
+    HTML: 101,              //  Base64 encoded HTML data.
+    JAVASCIPT: 102,         //  Base64 encoded Javascript data.
+    JSON: 103,              //  Base64 encoded JSON data.
+    XML: 104,               //  Base64 encoded XML data.
+    SQL: 105,               //  Base64 encoded SQL data.
+    LUA: 201,               //  Base64 encoded LUA data.
+    LUARES: 202,            //  Base64 encoded LUA result data.
+    UXTYPE1: 300,           //  Base64 encoded UX Type 1 data.
+    DMROW: 500,             //  Base64 encoded DM data row.
+    DRIVER: 501,            //  Base64 encoded Driver data row.
+    USER: 502,              //  Base64 encoded User data row.
+    FILTER: 503             //  Base64 encoded Filter data data.
 };
 
-/** VSCP variable type names
- * @type {string[]}
- * @const
- */
-vscp.constants.varTypeNames = [
-    "Unassigned",
-    "String",
-    "Boolean",
-    "Integer",
-    "Long",
-    "Double",
-    "Measurement",
-    "Event",
-    "GUID",
-    "Event data",
-    "Event class",
-    "Event type",
-    "Event timestamp",
-    "Date and Time"
+// Use to fill dtop down booxes and simular
+vscp.constants.arrTypeNames = [
+    "Unassigned",          // Unassigned variable
+    "String",              // String value (Base64 encoded)
+    "Boolean",             // Boolean value (true, false, 0 or 1)
+    "Integer",             // Integer value
+    "Long",                // Long value
+    "Double",              // Double value
+    "Measurement",         // String representation of the measurement.
+    "Event",               // VSCP event head, class, type, obId, timestamp, GUID, data 1, data 2, data ...
+    "GUID",                // Standard GUID string format: FF:FF:FF:FF:FF:FF:FF:FF:FF:FF:FF:FF:FF:FF:FF:FF
+    "Event Data",          // Comma separated list with decimal values. 1,2,3,4,5,6,7,8, ...
+    "Event Class",         // Integer value for VSCP class
+    "Event Type",          // Integer value for VSCP type
+    "Event Timestamp",     // Time when event was received in ms
+    "Data/Time",           // Date + Time in ISO format 2008-11-07T20:10.00
+    "Date",                //  ISO date 2008-11-07
+    "Time",                //  ISO Time 20:10.00
+    "Blob",                //  Base64 encoded binary data.    
+    "Mime",                //  Base64 mime types data base64(mimetype;data)
+    "HTML",                //  Base64 encoded HTML data.
+    "JavaScript",          //  Base64 encoded Javascript data.
+    "JSON",                //  Base64 encoded JSON data.
+    "XML",                 //  Base64 encoded XML data.
+    "SQL",                 //  Base64 encoded SQL data.
+    "LUA",                 //  Base64 encoded LUA data.
+    "LUARES",              //  Base64 encoded LUA result data.
+    "UXType1",             //  Base64 encoded UX Type 1 data.
+    "DMRow",               //  Base64 encoded DM data row.
+    "Driver",              //  Base64 encoded Driver data row.
+    "User",                //  Base64 encoded User data row.
+    "Filter"
 ];
 
+///////////////////////////////////////////////////////////////////////////////
+// vscp.getVarTypeName
+//
+// Return variable type description/name from numerical code 
+//
+
+vscp.getVarTypeName = function ( n ) {
+    if ( vscp.constants.varTypes.UNASSIGNED == n  ) {
+        return "unassigned";
+    }
+    else if ( vscp.constants.varTypes.STRING == n  ) {
+        return "String";
+    }              
+    else if ( vscp.constants.varTypes.BOOLEAN == n  ) {
+        return "Boolean";
+    }             
+    else if ( vscp.constants.varTypes.INTEGER == n  ) {
+        return "Integer";
+    }             
+    else if ( vscp.constants.varTypes.LONG == n  ) {
+        return "Long";
+    }               
+    else if ( vscp.constants.varTypes.DOUBLE == n  ) {
+        return "Double";
+    }             
+    else if ( vscp.constants.varTypes.MEASUREMENT == n  ) {
+        return "Measurement";
+    }         
+    else if ( vscp.constants.varTypes.EVENT == n  ) {
+        return "Event";
+    }               
+    else if ( vscp.constants.varTypes.GUID == n  ) {
+        return "GUID";
+    }                
+    else if ( vscp.constants.varTypes.EVENT_DATA == n  ) {
+        return "Event data";
+    }          
+    else if ( vscp.constants.varTypes.EVENT_CLASS == n  ) {
+        return "Event class";
+    }       
+    else if ( vscp.constants.varTypes.EVENT_TYPE == n  ) {
+        return "Event type";
+    }         
+    else if ( vscp.constants.varTypes.EVENT_TIMESTAMP == n  ) {
+        return "Event timestamp";
+    }    
+    else if ( vscp.constants.varTypes.DATE_TIME == n  ) {
+        return "Date and Time";
+    }          
+    else if ( vscp.constants.varTypes.DATE == n  ) {
+        return "Date";
+    }               
+    else if ( vscp.constants.varTypes.TIME == n  ) {
+        return "Time";
+    }               
+    else if ( vscp.constants.varTypes.BLOB == n  ) {
+        return "Blob";
+    }                
+    else if ( vscp.constants.varTypes.MIME == n  ) {
+        return "Mime";
+    }              
+    else if ( vscp.constants.varTypes.HTML == n  ) {
+        return "HTML";
+    }              
+    else if ( vscp.constants.varTypes.JAVASCIPT == n  ) {
+        return "Javascript";
+    }         
+    else if ( vscp.constants.varTypes.JSON == n  ) {
+        return "JSON";
+    }              
+    else if ( vscp.constants.varTypes.XML == n  ) {
+        return "XML";
+    }              
+    else if ( vscp.constants.varTypes.SQL == n  ) {
+        return "SQL";
+    }               
+    else if ( vscp.constants.varTypes.LUA == n  ) {
+        return "LUA";
+    }              
+    else if ( vscp.constants.varTypes.LUARES == n  ) {
+        return "LUA result";
+    }            
+    else if ( vscp.constants.varTypes.UXTYPE1 == n  ) {
+        return "UX Type 1";
+    }          
+    else if ( vscp.constants.varTypes.DMROW == n  ) {
+        return "DM-row";
+    }          
+    else if ( vscp.constants.varTypes.DRIVER == n  ) {
+        return "Driver";
+    }            
+    else if ( vscp.constants.varTypes.USER == n  ) {
+        return "User";
+    }              
+    else if ( vscp.constants.varTypes.FILTER == n  ) {
+        return "Filter";
+    }
+    else {
+        return "Unknown variable type";
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// vscp.getVarTypeName
+//
+// Return variable type from textual representation 
+//
+
+vscp.getVarTypeNumerical = function ( str ) {
+    if ( "unassigned" === str.toLowerCase() ) {
+        return vscp.constants.varTypes.UNASSIGNED;
+    }
+    else if ( "string" === str.toLowerCase() ) {
+        return vscp.constants.varTypes.STRING;
+    }
+    else if ( "boolean" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.BOOLEAN;
+    }             
+    else if ( "integer" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.INTEGER ;
+    }             
+    else if ( "long" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.LONG;
+    }               
+    else if ( "double" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.DOUBLE;
+    }             
+    else if ( "measurement" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.MEASUREMENT;
+    }         
+    else if ( "event" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.EVENT;
+    }               
+    else if ( "guid" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.GUID;
+    }                
+    else if ( "event data" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.EVENT_DATA;
+    }          
+    else if ( "event class" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.EVENT_CLASS;
+    }       
+    else if ( "event type" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.EVENT_TYPE;
+    }         
+    else if ( "event timestamp" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.EVENT_TIMESTAMP;
+    }    
+    else if ( "date and time" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.DATE_TIME;
+    }          
+    else if ( "date" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.DATE;
+    }               
+    else if ( "time" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.TIME;
+    }               
+    else if ( "blob" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.BLOB;
+    }                
+    else if ( "mime" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.MIME;
+    }              
+    else if ( "html" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.HTML;
+    }              
+    else if ( "javascript" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.JAVASCIPT;
+    }         
+    else if ( "json" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.JSON;
+    }              
+    else if ( "xml" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.XML;
+    }              
+    else if ( "sql" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.SQL;
+    }               
+    else if ( "lua" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.LUA;
+    }              
+    else if ( "lua result" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.LUARES;
+    }            
+    else if ( "ux Type 1" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.UXTYPE1;
+    }          
+    else if ( "dm-row" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.DMROW;
+    }          
+    else if ( "driver" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.DRIVER;
+    }            
+    else if ( "user" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.USER;
+    }              
+    else if ( "filter" == str.toLowerCase()  ) {
+        return vscp.constants.varTypes.FILTER;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// vscp.getEditorModeFromType
+//
+// Return ace editor formation mode string  from numerical vriable type code 
+//
+
+vscp.getEditorModeFromType = function ( n ) {
+    if ( vscp.constants.varTypes.UNASSIGNED == n  ) {
+        return "text";
+    }
+    else if ( vscp.constants.varTypes.STRING == n  ) {
+        return "text";
+    }              
+    else if ( vscp.constants.varTypes.BOOLEAN == n  ) {
+        return "text";
+    }             
+    else if ( vscp.constants.varTypes.INTEGER == n  ) {
+        return "text";
+    }             
+    else if ( vscp.constants.varTypes.LONG == n  ) {
+        return "text";
+    }               
+    else if ( vscp.constants.varTypes.DOUBLE == n  ) {
+        return "text";
+    }             
+    else if ( vscp.constants.varTypes.MEASUREMENT == n  ) {
+        return "c_cpp";
+    }         
+    else if ( vscp.constants.varTypes.EVENT == n  ) {
+        return "c_cpp";
+    }               
+    else if ( vscp.constants.varTypes.GUID == n  ) {
+        return "asciidoc";
+    }                
+    else if ( vscp.constants.varTypes.EVENT_DATA == n  ) {
+        return "c_cpp";
+    }          
+    else if ( vscp.constants.varTypes.EVENT_CLASS == n  ) {
+        return "c_cpp";
+    }       
+    else if ( vscp.constants.varTypes.EVENT_TYPE == n  ) {
+        return "c_cpp";
+    }         
+    else if ( vscp.constants.varTypes.EVENT_TIMESTAMP == n  ) {
+        return "c_cpp";
+    }    
+    else if ( vscp.constants.varTypes.DATE_TIME == n  ) {
+        return "text";
+    }          
+    else if ( vscp.constants.varTypes.DATE == n  ) {
+        return "c_cpp";
+    }               
+    else if ( vscp.constants.varTypes.TIME == n  ) {
+        return "c_cpp";
+    }               
+    else if ( vscp.constants.varTypes.BLOB == n  ) {
+        return "c_cpp";
+    }                
+    else if ( vscp.constants.varTypes.MIME == n  ) {
+        return "c_cpp";
+    }              
+    else if ( vscp.constants.varTypes.HTML == n  ) {
+        return "html";
+    }              
+    else if ( vscp.constants.varTypes.JAVASCIPT == n  ) {
+        return "javascript";
+    }         
+    else if ( vscp.constants.varTypes.JSON == n  ) {
+        return "json";
+    }              
+    else if ( vscp.constants.varTypes.XML == n  ) {
+        return "xml";
+    }              
+    else if ( vscp.constants.varTypes.SQL == n  ) {
+        return "sql";
+    }               
+    else if ( vscp.constants.varTypes.LUA == n  ) {
+        return "lua";
+    }              
+    else if ( vscp.constants.varTypes.LUARES == n  ) {
+        return "lua";
+    }            
+    else if ( vscp.constants.varTypes.UXTYPE1 == n  ) {
+        return "xml";
+    }          
+    else if ( vscp.constants.varTypes.DMROW == n  ) {
+        return "c_cpp";
+    }          
+    else if ( vscp.constants.varTypes.DRIVER == n  ) {
+        return "c_cpp";
+    }            
+    else if ( vscp.constants.varTypes.USER == n  ) {
+        return "c_cpp";
+    }              
+    else if ( vscp.constants.varTypes.FILTER == n  ) {
+        return "c_cpp";
+    }
+    else {
+        return "text";
+    }
+}
+
+
+
 /* ---------------------------------------------------------------------- */
+
+
+// Since DOMStrings are 16-bit-encoded strings, in most browsers calling window.btoa 
+// on a Unicode string will cause a Character Out Of Range exception if a character 
+// exceeds the range of a 8-bit ASCII-encoded character.
+
+// Base64 unicode safe encode 
+vscp.b64EncodeUnicode = function ( str ) {
+    return btoa( encodeURIComponent( str ).replace( /%([0-9A-F]{2})/g, function( match, p1 ) {
+        return String.fromCharCode( '0x' + p1 );
+    }));
+}
+
+// Base64 unicode safe decode 
+vscp.b64DecodeUnicode = function ( str ) {
+    return decodeURIComponent( Array.prototype.map.call( atob( str ), function( c ) {
+        return '%' + ( '00' + c.charCodeAt( 0 ).toString( 16 ) ).slice( -2 );
+    }).join('') );
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// vscp.isBase64Type
+//
+// Return true if a type is a type that is stored BASE64 ecoded
+//
+
+vscp.isBase64Type = function ( type ) {
+    switch ( Number( type ) ) {
+        case vscp.constants.varTypes.STRING:
+        case vscp.constants.varTypes.BLOB:  
+        case vscp.constants.varTypes.MIME: 
+        case vscp.constants.varTypes.HTML: 
+        case vscp.constants.varTypes.JAVASCIPT: 
+        case vscp.constants.varTypes.JSON: 
+        case vscp.constants.varTypes.XML: 
+        case vscp.constants.varTypes.SQL: 
+        case vscp.constants.varTypes.LUA: 
+        case vscp.constants.varTypes.LUARES: 
+        case vscp.constants.varTypes.UXTYPE1: 
+        case vscp.constants.varTypes.DMROW: 
+        case vscp.constants.varTypes.DRIVER: 
+        case vscp.constants.varTypes.USER: 
+        case vscp.constants.varTypes.FILTER:
+            return true;
+    }
+
+    return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// vscp.decodeValueIfBase64
+//
+// Return decoded value if type is BASE64 encoded type 
+// else return original value.
+//
+
+vscp.decodeValueIfBase64 = function ( type, value ) {
+    if ( vscp.isBase64Type( type ) ) {
+        return vscp.b64DecodeUnicode( value );
+    }
+    else {
+        return value;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// vscp.encodeValueIfBase64
+//
+// Return encoded value if type is type that should be BASE64 encoded 
+// else return original value.
+//
+
+vscp.encodeValueIfBase64 = function ( type, value ) {
+    if ( vscp.isBase64Type( type ) ) {
+        return vscp.b64EncodeUnicode( value );
+    }
+    else {
+        return value;
+    }
+}
 
 /**
  * VSCP event.
@@ -1316,15 +1732,18 @@ vscp.Event = function ( options ) {
     this.vscpData       = [];
 
     if ( "undefined" !== typeof options ) {
+
         if ( "number" === typeof options.vscpHead ) {
             this.vscpHead = options.vscpHead;
         }
+        
         if ( "number" === typeof options.vscpPriority ) {
             if ( ( 0 <= options.vscpPriority ) && ( 7 >= options.vscpPriority ) ) {
                 this.vscpHead &= 0x1f;
                 this.vscpHead |= options.vscpPriority << 5;
             }
         }
+        
         if ( "boolean" === typeof options.vscpHardCoded ) {
             if ( false === options.vscpHardCoded ) {
                 this.vscpHead &= 0xef;
@@ -1333,6 +1752,7 @@ vscp.Event = function ( options ) {
                 this.vscpHead |= 0x10;
             }
         }
+        
         if ( "boolean" === typeof options.vscpCalcCRC ) {
             if ( false === options.vscpCalcCRC ) {
                 this.vscpHead &= 0xf7;
@@ -1341,6 +1761,7 @@ vscp.Event = function ( options ) {
                 this.vscpHead |= 0x08;
             }
         }
+        
         if ( "boolean" === typeof options.vscpIsCANMessage ) {
             if ( false === options.vscpIsCANMessage ) {
                 this.vscpHead &= 0xfb;
@@ -1349,6 +1770,7 @@ vscp.Event = function ( options ) {
                 this.vscpHead |= 0x04;
             }
         }
+        
         if ( "boolean" === typeof options.vscpIsExtendedCANMessage ) {
             if ( false === options.vscpIsExtendedCANMessage ) {
                 this.vscpHead &= 0xfd;
@@ -1357,6 +1779,7 @@ vscp.Event = function ( options ) {
                 this.vscpHead |= 0x02;
             }
         }
+        
         if ( "boolean" === typeof options.vscpIsRemoteFrame ) {
             if ( false === options.vscpIsRemoteFrame ) {
                 this.vscpHead &= 0xfe;
@@ -1365,21 +1788,27 @@ vscp.Event = function ( options ) {
                 this.vscpHead |= 0x01;
             }
         }
+        
         if ( "number" === typeof options.vscpClass ) {
             this.vscpClass = options.vscpClass;
         }
+        
         if ( "number" === typeof options.vscpType ) {
             this.vscpType = options.vscpType;
         }
+        
         if ( "number" === typeof options.vscpObId ) {
             this.vscpObId = options.vscpObId;
         }
+        
         if ( "number" === typeof options.vscpTimeStamp ) {
             this.vscpTimeStamp = options.vscpTimeStamp;
         }
+        
         if ( "string" === typeof options.vscpGuid ) {
             this.vscpGuid = options.vscpGuid;
         }
+        
         if ( ( "string" === typeof options.vscpData ) || ( options.vscpData instanceof Array ) ) {
             this.vscpData = options.vscpData;
         }
@@ -1462,7 +1891,10 @@ vscp.utility.getTime = function() {
         return str;
     };
 
-    return "" + paddingHead( now.getHours(), 2 ) + ":" + paddingHead( now.getMinutes(), 2 ) + ":" + paddingHead( now.getSeconds(), 2 ) + "." + paddingTail( now.getMilliseconds(), 3 );
+    return "" + paddingHead( now.getHours(), 2 ) + ":" + 
+                    paddingHead( now.getMinutes(), 2 ) + ":" + 
+                    paddingHead( now.getSeconds(), 2 ) + "." + 
+                    paddingTail( now.getMilliseconds(), 3 );
 };
 
 /**
@@ -1579,15 +2011,70 @@ vscp.Connection = function() {
         AUTHENTICATED: 2
     };
 
+    /** Substates of the VSCP websocket
+     * @enum {number}
+     */
+    this.substates = {
+        /** No events sent from server */
+        CLOSED: 0,
+        /** Events sent from server */
+        OPEN: 1
+    };
+
     /** Websocket
      * @member {object}
      */
     this.socket = null;
 
+    /** url used for connection establishment
+     * @member {string}
+     */
+    this.url = "";
+
     /** User name used for connection establishment
      * @member {string}
      */
     this.userName = "";
+
+    /** User id from authentication AUTH1
+     * @member {number}
+     */
+    this.userId = 0;
+
+    /** User full name from authentication AUTH1
+     * @member {string}
+     */
+    this.userFullname = "";
+
+    /** User rights from authentication AUTH1
+     * @member {array}
+     */
+    this.userRights = new Array;
+
+    /** User allowed remotes from authentication AUTH1
+     * @member {array}
+     */
+    this.userRemotes = new Array;
+
+    /** User allowed events from authentication AUTH1
+     * @member {array}
+     */
+    this.userEvents = new Array;
+
+    /** User note from authentication AUTH1
+     * @member {string}
+     */
+    this.userNote = "";
+
+    /** Password used for connection establishment
+     * @member {string}
+     */
+    this.password = "";
+
+    /** authdomain used for connection establishment
+     * @member {string}
+     */
+    this.authdomain = "";
 
     /** Password hash used for connection establishment
      * @member {string}
@@ -1609,7 +2096,7 @@ vscp.Connection = function() {
      */
     this.onEvent = [];
 
-    /** Callback called on any received variable (see LISTVAR command)
+    /** Callback called on any received variable (see LSTVAR command)
      * @member {function}
      */
     this.onVariable = null;
@@ -1623,6 +2110,11 @@ vscp.Connection = function() {
      * @member {number}
      */
     this.state = this.states.DISCONNECTED;
+
+    /** VSCP event traffic is closed
+     * @member {number}
+     */
+    this.substate = this.substates.CLOSED;
 
     /** VSCP server command
      * @class
@@ -1657,6 +2149,7 @@ vscp.Connection = function() {
      * @return {number} Index of command in the queue. If index is < 0, the command was not found.
      */
     var getPendingCommandIndex = function( command ) {
+
         var index = 0;
 
         for( index = 0; index < cmdQueue.length; ++index ) {
@@ -1859,7 +2352,7 @@ vscp.Connection = function() {
      */
     this.signalConnError = function() {
         if ( ( "function" === typeof this.onConnError ) &&
-             ( null !== this.onConnError ) ) {
+             ( null !== this.onConnError ) ) {    
             this.onConnError( this );
         }
     };
@@ -1965,6 +2458,7 @@ vscp.Connection = function() {
     return this;
 };
 
+
 /**
  * This function is called by the websocket in case the connection is established.
  * It will initiate the authentication with the VSCP server.
@@ -2022,15 +2516,16 @@ vscp.Connection.prototype.onWebSocketMessage = function( msg ) {
                 cmd = this.getPendingCommand( "CHALLENGE" );
 
                 if ( null !== cmd ) {
+
                     console.info( vscp.utility.getTime() + " Security challenge received." );
 
                     this._sendCommand({
                         command: "AUTH",
-                        data: this.userName + ";" + vscp.utility.getWebSocketAuthHash(
-                            this.userName,
-                            this.passwordHash,
-                            msgItems[ 2 ]
-                        ),
+                        data: this.userName + ";" + 
+                                vscp.utility.getWebSocketAuthHash( this.userName,
+                                                                        this.passwordHash,
+                                                                        msgItems[ 2 ]       // sid
+                                                                 ),
                         onSuccess: null,
                         onError: null
                     });
@@ -2045,19 +2540,30 @@ vscp.Connection.prototype.onWebSocketMessage = function( msg ) {
 
                     if ( this.states.CONNECTED === this.state ) {
                         this.state = this.states.AUTHENTICATED;
-                        this.signalSuccess( "FUNCTION_CONNECT" );
+                        this.signalSuccess( "FUNCTION_CONNECT" );                        
                     }
+                    
+                    // Save authenticated user info
+                    this.userId = parseInt( msgItems[2] );
+                    this.userFullname = msgItems[3];
+                    this.userRights = msgItems[4].split("/");
+                    this.userRemotes = msgItems[5];
+                    this.userEvents = msgItems[6];
+                    this.userNote = msgItems[7];
+
                 }
             }
             else if ( "OPEN" === msgItems[ 1 ] ) {
                 console.info( vscp.utility.getTime() + " Receiving events started." );
+                this.substate = this.substates.OPEN;
                 this.signalSuccess( msgItems[ 1 ] );
             }
             else if ( "CLOSE" === msgItems[ 1 ] ) {
                 console.info( vscp.utility.getTime() + " Receiving events stopped." );
+                this.substate = this.substates.CLOSE;
                 this.signalSuccess( msgItems[ 1 ] );
             }
-            else if ( "CLRQUEUE" === msgItems[ 1 ] ) {
+            else if ( "CLRQ" === msgItems[ 1 ] ) {
                 console.info( vscp.utility.getTime() + " VSCP event queue cleared." );
                 this.signalSuccess( msgItems[ 1 ] );
             }
@@ -2065,38 +2571,48 @@ vscp.Connection.prototype.onWebSocketMessage = function( msg ) {
                 //console.info( vscp.utility.getTime() + " VSCP event successful sent." );
                 this.signalSuccess( msgItems[ 1 ] );
             }
-            else if ( "SETFILTER" === msgItems[ 1 ] ) {
-                console.info( vscp.utility.getTime() + " Filter successful set." );
+            else if ( "SF" === msgItems[ 1 ] ) {
+                console.info( vscp.utility.getTime() + " Filter successfully set." );
                 this.signalSuccess( msgItems[ 1 ] );
             }
-            else if ( "READVAR" === msgItems[ 1 ] ) {
-                console.info( vscp.utility.getTime() + " Variable " + msgItems[ 2 ] + " (" + msgItems[ 4 ] + ") successful read." );
+            else if ( "RVAR" === msgItems[ 1 ] ) { 
+                console.info( vscp.utility.getTime() + 
+                                    " Variable " + 
+                                    msgItems[ 2 ] + 
+                                    " (" + msgItems[ 4 ] + 
+                                    ") successful read." );
                 this.signalSuccess(
                     msgItems[ 1 ],
                     {
-                        name: msgItems[ 2 ],    // Variable name
-                        type: msgItems[ 3 ],    // Variable type
-                        value: msgItems[ 4 ]    // Variable value
+                        // name;type;userid;accessright,bPersistent;userid;rights;lastchanged;value;note
+                        name: msgItems[ 2 ],                                        // Variable name
+                        type: parseInt( msgItems[ 3 ] ),                            // Variable type
+                        userid: parseInt( msgItems[ 4 ] ),                          // Variable user
+                        accessright: parseInt( msgItems[ 5 ] ),                     // Variable access
+                        persistency: ( "false" === msgItems[ 6 ] ) ? false : true,  // Variable persistency
+                        lastchange: msgItems[ 7 ],                                  // Variable lastchange
+                        value: vscp.decodeValueIfBase64( parseInt( msgItems[ 3 ] ), msgItems[ 8 ] ), // Variable value
+                        note: vscp.b64DecodeUnicode( msgItems[ 9 ] )                // Variable note
                     }
                 );
             }
-            else if ( "WRITEVAR" === msgItems[ 1 ] ) {
-                console.info( vscp.utility.getTime() + " Variable successful written." );
+            else if ( "WVAR" === msgItems[ 1 ] ) {
+                console.info( vscp.utility.getTime() + " Variable successfully written." );
                 this.signalSuccess(
                     msgItems[ 1 ],
                     {
-                        name: msgItems[ 2 ],    // Variable name
-                        type: msgItems[ 3 ],    // Variable type
-                        value: msgItems[ 4 ]    // Variable value
+                        name: msgItems[ 2 ],                // Variable name
+                        type: parseInt( msgItems[ 3 ] ),    // Variable type
+                        value: msgItems[ 4 ]                // Variable value
                     }
                 );
             }
-            else if ( "CREATEVAR" === msgItems[ 1 ] ) {
-                console.info( vscp.utility.getTime() + " Variable successful created." );
+            else if ( "CVAR" === msgItems[ 1 ] ) {
+                console.info( vscp.utility.getTime() + " Variable successfully created." );
                 this.signalSuccess( msgItems[ 1 ] );
             }
-            else if ( "RESETVAR" === msgItems[ 1 ] ) {
-                console.info( vscp.utility.getTime() + " Variable successful reset." );
+            else if ( "RSTVAR" === msgItems[ 1 ] ) {
+                console.info( vscp.utility.getTime() + " Variable successfully reset." );
                 this.signalSuccess(
                     msgItems[ 1 ],
                     {
@@ -2106,8 +2622,8 @@ vscp.Connection.prototype.onWebSocketMessage = function( msg ) {
                     }
                 );
             }
-            else if ( "REMOVEVAR" === msgItems[ 1 ] ) {
-                console.info( vscp.utility.getTime() + " Variable successful removed." );
+            else if ( "DELVAR" === msgItems[ 1 ] ) {
+                console.info( vscp.utility.getTime() + " Variable successfully removed." );
                 this.signalSuccess(
                     msgItems[ 1 ],
                     {
@@ -2115,8 +2631,8 @@ vscp.Connection.prototype.onWebSocketMessage = function( msg ) {
                     }
                 );
             }
-            else if ( "LENGTHVAR" === msgItems[ 1 ] ) {
-                console.info( vscp.utility.getTime() + " Variable length successful read." );
+            else if ( "LENVAR" === msgItems[ 1 ] ) {
+                console.info( vscp.utility.getTime() + " Variable length successfully read." );
                 this.signalSuccess(
                     msgItems[ 1 ],
                     {
@@ -2125,8 +2641,8 @@ vscp.Connection.prototype.onWebSocketMessage = function( msg ) {
                     }
                 );
             }
-            else if ( "LASTCHANGEVAR" === msgItems[ 1 ] ) {
-                console.info( vscp.utility.getTime() + " Variable last change successful read." );
+            else if ( "LCVAR" === msgItems[ 1 ] ) {
+                console.info( vscp.utility.getTime() + " Variable last change successfully read." );
                 this.signalSuccess(
                     msgItems[ 1 ],
                     {
@@ -2135,23 +2651,23 @@ vscp.Connection.prototype.onWebSocketMessage = function( msg ) {
                     }
                 );
             }
-            else if ( "LISTVAR" === msgItems[ 1 ] ) {
-                console.info( vscp.utility.getTime() + " Variable successful listed." );
+            else if ( "LSTVAR" === msgItems[ 1 ] ) {
+                console.info( vscp.utility.getTime() + " Variable successfully listed." );
                 this.signalSuccess( msgItems[ 1 ] );
                 this.signalVariable({
-                        id: parseInt( msgItems[ 2 ] ),                              // Consecutive number
-                        name: msgItems[ 3 ],                                        // Variable name
-                        type: msgItems[ 4 ],                                        // Variable type
-                        persistency: ( "false" === msgItems[ 5 ] ) ? false : true,  // Variable persistency
-                        value: msgItems[ 6 ]                                        // Variable value
+                        // +;LSTVAR;ordinal;name;type;userid;accessrights;persistance;last_change
+                        idx: parseInt( msgItems[ 2 ] ),                             // Ordinal
+                        count: parseInt( msgItems[ 3 ] ),                           // Total # variables
+                        name: msgItems[ 4 ],                                        // Variable name
+                        type: msgItems[ 5 ],                                        // Variable type
+                        userid: parseInt( msgItems[ 6 ] ),                          // Variable user
+                        accessright: parseInt( msgItems[ 7 ] ),                     // Variable access rights               
+                        persistency: ( "false" === msgItems[ 8 ] ) ? false : true,  // Variable persistency         
+                        lastchange: msgItems[ 9 ],                                  // Variable date                        
                 });
             }
-            else if ( "SAVEVAR" === msgItems[ 1 ] ) {
-                console.info( vscp.utility.getTime() + " Variables successful saved." );
-                this.signalSuccess( msgItems[ 1 ] );
-            }
-            else if ( "GT" === msgItems[ 1 ] ) {
-                console.info( vscp.utility.getTime() + " Table successful read." );
+            else if ( ( "GT" === msgItems[ 1 ] ) || ( "GETTABLE" === msgItems[ 1 ] ) ) {
+                console.info( vscp.utility.getTime() + " Table successfully read." );
                 this.signalSuccess(
                     msgItems[ 1 ],
                     {
@@ -2220,7 +2736,7 @@ vscp.Connection.prototype.onWebSocketMessage = function( msg ) {
                     }
                 );
             }
-            else if ( "CLRQUEUE" === msgItems[ 1 ] ) {
+            else if ( "CLRQ" === msgItems[ 1 ] ) {
                 console.error( vscp.utility.getTime() + " VSCP event queue couldn't be cleared." );
                 this.signalError(
                     msgItems[ 1 ],
@@ -2240,7 +2756,7 @@ vscp.Connection.prototype.onWebSocketMessage = function( msg ) {
                     }
                 );
             }
-            else if ( "SETFILTER" === msgItems[ 1 ] ) {
+            else if ( "SF" === msgItems[ 1 ] ) {
                 console.error( vscp.utility.getTime() + " Filter couldn't bet set." );
                 this.signalError(
                     msgItems[ 1 ],
@@ -2250,7 +2766,7 @@ vscp.Connection.prototype.onWebSocketMessage = function( msg ) {
                     }
                 );
             }
-            else if ( "READVAR" === msgItems[ 1 ] ) {
+            else if ( "RVAR" === msgItems[ 1 ] ) {
                 console.error( vscp.utility.getTime() + " Variable couldn't be read." );
                 this.signalError(
                     msgItems[ 1 ],
@@ -2260,7 +2776,7 @@ vscp.Connection.prototype.onWebSocketMessage = function( msg ) {
                     }
                 );
             }
-            else if ( "WRITEVAR" === msgItems[ 1 ] ) {
+            else if ( "WVAR" === msgItems[ 1 ] ) {
                 console.error( vscp.utility.getTime() + " Variable couldn't be written." );
                 this.signalError(
                     msgItems[ 1 ],
@@ -2270,7 +2786,7 @@ vscp.Connection.prototype.onWebSocketMessage = function( msg ) {
                     }
                 );
             }
-            else if ( "CREATEVAR" === msgItems[ 1 ] ) {
+            else if ( "CVAR" === msgItems[ 1 ] ) {
                 console.error( vscp.utility.getTime() + " Variable couldn't be created." );
                 this.signalError(
                     msgItems[ 1 ],
@@ -2280,7 +2796,7 @@ vscp.Connection.prototype.onWebSocketMessage = function( msg ) {
                     }
                 );
             }
-            else if ( "RESETVAR" === msgItems[ 1 ] ) {
+            else if ( "RSTVAR" === msgItems[ 1 ] ) {
                 console.error( vscp.utility.getTime() + " Variable couldn't be reset." );
                 this.signalError(
                     msgItems[ 1 ],
@@ -2290,7 +2806,7 @@ vscp.Connection.prototype.onWebSocketMessage = function( msg ) {
                     }
                 );
             }
-            else if ( "REMOVEVAR" === msgItems[ 1 ] ) {
+            else if ( "DELVAR" === msgItems[ 1 ] ) {
                 console.error( vscp.utility.getTime() + " Variable couldn't be removed." );
                 this.signalError(
                     msgItems[ 1 ],
@@ -2300,7 +2816,7 @@ vscp.Connection.prototype.onWebSocketMessage = function( msg ) {
                     }
                 );
             }
-            else if ( "LENGTHVAR" === msgItems[ 1 ] ) {
+            else if ( "LENVAR" === msgItems[ 1 ] ) {
                 console.error( vscp.utility.getTime() + " Variable length couldn't be read." );
                 this.signalError(
                     msgItems[ 1 ],
@@ -2310,7 +2826,7 @@ vscp.Connection.prototype.onWebSocketMessage = function( msg ) {
                     }
                 );
             }
-            else if ( "LASTCHANGEVAR" === msgItems[ 1 ] ) {
+            else if ( "LCVAR" === msgItems[ 1 ] ) {
                 console.error( vscp.utility.getTime() + " Variable last change couldn't be read." );
                 this.signalError(
                     msgItems[ 1 ],
@@ -2320,18 +2836,8 @@ vscp.Connection.prototype.onWebSocketMessage = function( msg ) {
                     }
                 );
             }
-            else if ( "LISTVAR" === msgItems[ 1 ] ) {
+            else if ( "LSTVAR" === msgItems[ 1 ] ) {
                 console.error( vscp.utility.getTime() + " Variables couldn't be listed." );
-                this.signalError(
-                    msgItems[ 1 ],
-                    {
-                        id: parseInt( msgItems[ 2 ] ),  // Error code
-                        str: msgItems[ 3 ]              // Error string
-                    }
-                );
-            }
-            else if ( "SAVEVAR" === msgItems[ 1 ] ) {
-                console.error( vscp.utility.getTime() + " Variables couldn't be saved." );
                 this.signalError(
                     msgItems[ 1 ],
                     {
@@ -2420,6 +2926,8 @@ vscp.Connection.prototype.connect = function( options ) {
         return;
     }
 
+    this.url = options.url;
+
     if ( "string" !== typeof options.userName ) {
         console.error( vscp.utility.getTime() + " User name is missing." );
         return;
@@ -2432,7 +2940,14 @@ vscp.Connection.prototype.connect = function( options ) {
         return;
     }
 
-    this.passwordHash = options.password;
+    this.password = options.password;
+
+    if ( "string" !== typeof options.authdomain ) {
+        console.error( vscp.utility.getTime() + " authdomain is missing." );
+        return;
+    }
+
+    this.authdomain = options.authdomain;
 
     if ( "function" !== typeof options.onMessage ) {
         this.onMessage = null;
@@ -2452,12 +2967,20 @@ vscp.Connection.prototype.connect = function( options ) {
         this.onConnError = options.onError;
     }
 
-    console.info( vscp.utility.getTime() + " Websocket connect to " + options.url + " (user name: " + this.userName + ", password hash: " + this.passwordHash + ")");
+    // Calculate password hash
+    this.passwordHash = vscp.utility.getWebSocketAuthHash( this.userName,
+                                                                this.authdomain,
+                                                                this.password );
 
+    console.info( vscp.utility.getTime() + 
+        " Websocket connect to " + options.url + 
+        " (user name: " + this.userName + ", password: " + this.passwordHash + ")");
+    
     this.socket = new WebSocket( options.url );
-
+    
     if ( null === this.socket ) {
-        console.error( vscp.utility.getTime() + " Couldn't open a websocket connection." );
+        console.error( vscp.utility.getTime() + 
+            " Couldn't open a websocket connection." );
 
         this.signalConnError();
 
@@ -2494,6 +3017,7 @@ vscp.Connection.prototype.disconnect = function() {
         this.socket.close();
         this.socket = null;
         this.state = this.states.DISCONNECTED;
+        this.substate = this.substates.CLOSED;
         this.cmdQueue = [];
     }
 };
@@ -2605,7 +3129,7 @@ vscp.Connection.prototype.clearQueue = function( options ) {
     }
 
     this._sendCommand({
-        command: "CLRQUEUE",
+        command: "CLRQ",
         data: "",
         onSuccess: onSuccess,
         onError: onError
@@ -2834,8 +3358,89 @@ vscp.Connection.prototype.setFilter = function ( options ) {
     }
 
     this._sendCommand({
-        command: "SETFILTER",
+        command: "SF",
         data: cmdData,
+        onSuccess: onSuccess,
+        onError: onError
+    });
+};
+
+/**
+ * Create a a VSCP server variable.
+ *
+ * @param {object} options                      - Options
+ * @param {string} options.name                 - Variable name
+ * @param {number} options.type                 - Variable type
+ * @param {number} options.accessrights         - Variable value
+ * @param {boolean} options.persistency         - Variable is persistent (true) or not (false)
+ * @param {string} options.value                - Variable Value
+ * @param {string} options.note                 - Variable note (optional)
+ * @param {function} [options.onSuccess]        - Function which is called on a successful operation
+ * @param {function} [options.onError]          - Function which is called on a failed operation
+ */
+vscp.Connection.prototype.createVar = function ( options ) {
+
+    var onSuccess       = null;
+    var onError         = null;
+    var type            = vscp.constants.varTypes.STRING;   // default type is string
+    var accessrights    = 744;                              // default access rights 
+    var persistency     = 0;                                // Not persistent
+    var note            = "";                               // No note
+
+    if ( "undefined" === typeof options ) {
+        console.error( vscp.utility.getTime() + " Options are missing. " );
+        return;
+    }
+
+    if ( "string" !== typeof options.name ) {
+        console.error( vscp.utility.getTime() + " Variable name is missing. " );
+        return;
+    }
+
+    if ( "string" !== typeof options.type ) {
+        console.error( vscp.utility.getTime() + " Variable type is missing. " );
+        return;
+    }
+
+    if ( "string" === typeof options.accessrights ) {
+        accessrights = options.accessrights;
+    }
+
+    if ( "string" === typeof options.persistency ) {
+        
+        if ( 'false' === options.persistency.toLowerCase() ) {
+            persistency = 0;
+        }
+        else {
+            persistency = 1;
+        }
+    }
+
+    if ( "string" !== typeof options.value ) {
+        console.error( vscp.utility.getTime() + " Variable value is missing. " );
+        return;
+    }
+
+    if ( "string" === typeof options.note ) {
+        note = options.note;
+    }
+
+    if ( "function" === typeof options.onSuccess ) {
+        onSuccess = options.onSuccess;
+    }
+
+    if ( "function" === typeof options.onError ) {
+        onError = options.onError;
+    }
+
+    this._sendCommand({
+        command: "CVAR",
+        data: options.name + ";" + 
+                options.type + ";" + 
+                accessrights + ";" + 
+                persistency + ";" + 
+                vscp.encodeValueIfBase64( options.type, options.value ) + ";" + 
+                vscp.b64EncodeUnicode( options.note ),
         onSuccess: onSuccess,
         onError: onError
     });
@@ -2873,7 +3478,7 @@ vscp.Connection.prototype.readVar = function ( options ) {
     }
 
     this._sendCommand({
-        command: "READVAR",
+        command: "RVAR",
         data: options.name,
         onSuccess: onSuccess,
         onError: onError
@@ -2886,6 +3491,7 @@ vscp.Connection.prototype.readVar = function ( options ) {
  * @param {object} options                  - Options
  * @param {string} options.name             - Variable name
  * @param {string} options.value            - Variable value
+ * @param {string} options.type             - Variable type
  * @param {function} [options.onSuccess]    - Function which is called on a successful operation
  * @param {function} [options.onError]      - Function which is called on a failed operation
  */
@@ -2895,7 +3501,7 @@ vscp.Connection.prototype.writeVar = function ( options ) {
     var onError     = null;
 
     if ( "undefined" === typeof options ) {
-        console.error( vscp.utility.getTime() + " Options are missing. " );
+        console.error( vscp.utility.getTime() + " Options is missing. " );
         return;
     }
 
@@ -2909,68 +3515,11 @@ vscp.Connection.prototype.writeVar = function ( options ) {
         return;
     }
 
-    if ( "function" === typeof options.onSuccess ) {
-        onSuccess = options.onSuccess;
-    }
-
-    if ( "function" === typeof options.onError ) {
-        onError = options.onError;
-    }
-
-    this._sendCommand({
-        command: "WRITEVAR",
-        data: options.name + ";" + options.value,
-        onSuccess: onSuccess,
-        onError: onError
-    });
-};
-
-/**
- * Create a a VSCP server variable.
- *
- * @param {object} options                  - Options
- * @param {string} options.name             - Variable name
- * @param {number} options.type             - Variable type
- * @param {string} options.value            - Variable value
- * @param {boolean} options.persistency     - Variable is persistent (true) or not (false)
- * @param {function} [options.onSuccess]    - Function which is called on a successful operation
- * @param {function} [options.onError]      - Function which is called on a failed operation
- */
-vscp.Connection.prototype.createVar = function ( options ) {
-
-    var onSuccess   = null;
-    var onError     = null;
-    var persistency = 1;
-
-    if ( "undefined" === typeof options ) {
-        console.error( vscp.utility.getTime() + " Options are missing. " );
-        return;
-    }
-
-    if ( "string" !== typeof options.name ) {
-        console.error( vscp.utility.getTime() + " Variable name is missing. " );
-        return;
-    }
-
-    if ( "number" !== typeof options.type ) {
+    if ( "string" !== typeof options.type ) {
         console.error( vscp.utility.getTime() + " Variable type is missing. " );
         return;
     }
 
-    if ( "string" !== typeof options.value ) {
-        console.error( vscp.utility.getTime() + " Variable value is missing. " );
-        return;
-    }
-
-    if ( "boolean" === typeof options.persistency ) {
-        if ( false === options.persistency ) {
-            persistency = 0;
-        }
-        else {
-            persistency = 1;
-        }
-    }
-
     if ( "function" === typeof options.onSuccess ) {
         onSuccess = options.onSuccess;
     }
@@ -2980,12 +3529,14 @@ vscp.Connection.prototype.createVar = function ( options ) {
     }
 
     this._sendCommand({
-        command: "CREATEVAR",
-        data: options.name + ";" + options.type + ";" + persistency + ";" + options.value,
+        command: "WVAR",
+        data: options.name + ";" + vscp.encodeValueIfBase64( options.type, options.value ),
         onSuccess: onSuccess,
         onError: onError
     });
 };
+
+
 
 /**
  * Reset a VSCP server variable.
@@ -3019,7 +3570,7 @@ vscp.Connection.prototype.resetVar = function ( options ) {
     }
 
     this._sendCommand({
-        command: "RESETVAR",
+        command: "RSTVAR",
         data: options.name,
         onSuccess: onSuccess,
         onError: onError
@@ -3058,7 +3609,7 @@ vscp.Connection.prototype.removeVar = function ( options ) {
     }
 
     this._sendCommand({
-        command: "REMOVEVAR",
+        command: "DELVAR",
         data: options.name,
         onSuccess: onSuccess,
         onError: onError
@@ -3097,7 +3648,7 @@ vscp.Connection.prototype.lengthVar = function ( options ) {
     }
 
     this._sendCommand({
-        command: "LENGTHVAR",
+        command: "LENVAR",
         data: options.name,
         onSuccess: onSuccess,
         onError: onError
@@ -3136,7 +3687,7 @@ vscp.Connection.prototype.lastChangeVar = function ( options ) {
     }
 
     this._sendCommand({
-        command: "LASTCHANGEVAR",
+        command: "LCVAR",
         data: options.name,
         onSuccess: onSuccess,
         onError: onError
@@ -3154,10 +3705,15 @@ vscp.Connection.prototype.listVar = function ( options ) {
 
     var onSuccess   = null;
     var onError     = null;
+    var regex       = null;
 
     if ( "undefined" === typeof options ) {
         console.error( vscp.utility.getTime() + " Options are missing. " );
         return;
+    }
+
+    if ( "string" !== typeof options.regex ) {
+        regex = options.regex;
     }
 
     if ( "function" !== typeof options.onVariable ) {
@@ -3176,45 +3732,13 @@ vscp.Connection.prototype.listVar = function ( options ) {
     }
 
     this._sendCommand({
-        command: "LISTVAR",
-        data: "",
+        command: "LSTVAR",
+        data: options.regex,
         onSuccess: onSuccess,
         onError: onError
     });
 };
 
-/**
- * Save persistent variables.
- *
- * @param {object} options                  - Options
- * @param {function} [options.onSuccess]    - Function which is called on a successful operation
- * @param {function} [options.onError]      - Function which is called on a failed operation
- */
-vscp.Connection.prototype.saveVar = function ( options ) {
-
-    var onSuccess   = null;
-    var onError     = null;
-
-    if ( "undefined" === typeof options ) {
-        console.error( vscp.utility.getTime() + " Options are missing. " );
-        return;
-    }
-
-    if ( "function" === typeof options.onSuccess ) {
-        onSuccess = options.onSuccess;
-    }
-
-    if ( "function" === typeof options.onError ) {
-        onError = options.onError;
-    }
-
-    this._sendCommand({
-        command: "SAVEVAR",
-        data: "",
-        onSuccess: onSuccess,
-        onError: onError
-    });
-};
 
 /**
  * Get data from a table.
