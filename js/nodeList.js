@@ -9,7 +9,7 @@
 //
 // The MIT License (MIT)
 //
-// Copyright (c) 2012-2016 Grodans Paradis AB (Paradise of the Frog)
+// Copyright (c) 2012-2018 Ake Hedman, Grodans Paradis AB
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal

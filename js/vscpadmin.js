@@ -9,7 +9,7 @@
 //
 // The MIT License (MIT)
 //
-// Copyright (c) 2012-2016 Grodans Paradis AB (Paradise of the Frog)
+// Copyright (c) 2012-2018 Grodans Paradis AB (Paradise of the Frog)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -55,8 +55,8 @@ vscp.admin.timeout = 5000;
 
 // Admin interface Constants
 vscp.admin.config = {
-    copyright: 'Copyright &copy; 2000-2016 <a href="http://www.grodansparadis.com">Grodans Paradis AB (Paradise of the Frog)</a>',
-    version: "0.0.2",
+    copyright: 'Copyright &copy; 2000-2018, Ake Hedman <a href="http://www.grodansparadis.com">Grodans Paradis AB</a>',
+    version: "0.1.9",
 };
 
 

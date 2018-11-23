@@ -9,34 +9,42 @@
     <meta http-equiv="Expires" content="-1" />
 
     <!-- JQuery -->
-    <script type="text/javascript" src="../js/jquery/3.1.1/jquery-3.1.1.min.js"></script>
+    <script type="text/javascript" src="js/jquery/3.1.1/jquery-3.1.1.min.js"></script>
 
     <!-- Bootstrap -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="../js/bootstrap/3.3.7/css/bootstrap.min.css"> 
-    <script type="text/javascript" src="../js/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="js/bootstrap/3.3.7/css/bootstrap.min.css"> 
+    <script type="text/javascript" src="js/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     
     <!-- Bootstrap dialogs -->
-    <link rel="stylesheet" href="../js/bootstrap3-dialog/1.34.6/css/bootstrap-dialog.min.css">
-    <script type="text/javascript" src="../js/bootstrap3-dialog/1.34.6/js/bootstrap-dialog.min.js"></script>
+    <link rel="stylesheet" href="js/bootstrap3-dialog/1.34.6/css/bootstrap-dialog.min.css">
+    <script type="text/javascript" src="js/bootstrap3-dialog/1.34.6/js/bootstrap-dialog.min.js"></script>
     
     <!-- Favorite icon -->
     <link rel="icon" href="favicon.ico">
 
     <!-- VSCP settings -->
-    <script type="text/javascript" src="../js/settings.js"></script>
+    <script type="text/javascript" src="js/settings.js"></script>
     <!-- VSCP hash calculation -->
-    <script type="text/javascript" src="../js/md5.js"></script>
+    <script type="text/javascript" src="js/md5.js"></script>
+    <!-- VSCP encryption/decryption -->
+    <script type="text/javascript" src="js/aes-js/3.1.0/index.js"></script>
     <!-- VSCP websocket bases library -->
-    <script type="text/javascript" src="../js/vscp.js"></script>
+    <script type="text/javascript" src="js/vscp-js/1.0.0pre/vscp.js"></script>
+    <!-- VSCP class definitions -->
+    <script type="text/javascript" src="js/vscp-js/1.0.0pre/vscp_class.js"></script>
+    <!-- VSCP type definitions -->
+    <script type="text/javascript" src="js/vscp-js/1.0.0pre/vscp_type.js"></script>
+    <!-- VSCP websocket client library -->
+    <script type="text/javascript" src="js/vscp-js/1.0.0pre/vscpws.js"></script>
     <!-- VSCP admin library -->
-    <script type="text/javascript" src="../js/vscpadmin.js"></script>
+    <script type="text/javascript" src="js/vscpadmin.js"></script>
 
     <!-- Menu styles -->
     <link rel="stylesheet" type="text/css" href="css/menu.css">
     
     <!-- Boostrap navigation bar helper functions -->
-    <script type="text/javascript" src="../js/navBar.js"></script>
+    <script type="text/javascript" src="js/navBar.js"></script>
     <!-- Navigation bar menu structure -->
     <script type="text/javascript" src="js/menu.js"></script>
 
@@ -44,8 +52,8 @@
 
     <script type="text/javascript">
 
-        // VSCP websocket connection
-        var vscpConn = null;
+        // VSCP websocket client
+        var vscpClient = null;
 
         // Wait until the whole website is loaded
         $( document ).ready( function() {
@@ -84,7 +92,7 @@
             }
 
             // Create a VSCP websocket
-            vscpConn = new vscp.Connection();
+            vscpClient = new vscp.ws.Client();
 
         });
 
@@ -95,7 +103,7 @@
             $('#setServer').modal();
         };
 
-        // Get results from slect server modal
+        // Get results from select server modal
         function setServerResult() 
         {            
             // Save server data
@@ -128,11 +136,12 @@
             var deferred = new $.Deferred();
 
             // Connect to VSCP server
-            vscpConn.connect({
+            vscpClient.connect({
 
                 url: settings.url,
                 userName: settings.user,
                 password: settings.password,
+                vscpkey: settings.vscpkey,
                 authdomain: settings.authdomain,                                                                
 
                 onSuccess: function( conn ) {
@@ -153,7 +162,7 @@
 
         // Disconnect from the VSCP daemon
         function doDisconnect() {
-            vscpConn.disconnect();
+            vscpClient.disconnect();
             vscp.admin.setStatus( settings.url, false );
         };
 
@@ -161,7 +170,7 @@
         function doTestConnect() {
 
             // VSCP websocket connection
-            var vscpConn = null;
+            var vscpClient = null;
 
             // Wait until the whole website is loaded
             $( document ).ready( function() {
@@ -170,14 +179,15 @@
                 navBarMenu.show( "menu", navBarMenu.content );
 
                 // Create a VSCP websocket
-                vscpConn = new vscp.Connection();
+                vscpClient = new vscp.ws.Client();
 
                 // Connect to VSCP server
-                vscpConn.connect({
+                vscpClient.connect({
 
                     url: settings.url,
                     userName: settings.user,
                     password: settings.password,
+                    vscpkey: settings.vscpkey,
                     authdomain: settings.authdomain, 
 
                     onSuccess: function( conn ) {
@@ -204,7 +214,7 @@
         <div class="container-fluid">
             <div class="navbar-header">
                 <a class="navbar-brand" href="index.html">
-                <img src="../images/logo/vscp_new.png" class="img-thumbnail" width="120" alt="vscp logo" /></a>
+                <img src="images/logo/vscp_new.png" class="img-thumbnail" width="120" alt="vscp logo" /></a>
             </div>
             <div id="menu">
             </div>
@@ -276,7 +286,8 @@
     </div>
 
     <div>
-            <img class="logo" src="../images/logo/vscp_new_v2.png" width="400" />
+            <br><br><br><br><br><br>
+            <img class="logo" src="images/logo/vscp_logo_text_box_600.png" width="400" />
     </div>
     
     <!--

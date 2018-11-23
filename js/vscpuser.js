@@ -11,7 +11,7 @@
 //
 // The MIT License (MIT)
 //
-// Copyright (c) 2012-2016 Grodans Paradis AB (Paradise of the Frog)
+// Copyright (c) 2012-2018 Grodans Paradis AB (Paradise of the Frog)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -92,32 +92,27 @@ vscp.user.fetchUsers = function ( onSuccessEx, onErrorEx ) {
     // Clear user info array
     vscp.user.userinfo = [];
 
-    vscpConn.readVar({
+    vscpClient.readVar({
     
         name: "vscp.user.count",
 
         onSuccess: function( conn, options ) {
+            
+            var count = options.value; 
+            
+            for ( i=0; i<count; i++ ) {
 
-            var count = options.value;    
-            for ( i=0; i<count; i++ ) {    
- 
-                vscpConn.readVar({
+                vscpClient.readVar({
 
                     name: "vscp.user." + i.toString(),
 
                     onSuccess: function( conn, options ) {  
-
+                        
                         // Add to array
                         var items = options.value.split(";");
                         vscp.user.userinfo.push( items );
-
                         var dd =  options.name.split("."); 
-
-                        // Signal success when last user is read
-                        if ( (count-1) == dd[2] ) {
-                            _onSuccess && _onSuccess();
-                        }
-
+                        
                     },
 
                     onError: function( conn ) {
@@ -125,10 +120,10 @@ vscp.user.fetchUsers = function ( onSuccessEx, onErrorEx ) {
                     }
                 }); 
 
-            }; // for  
-
+            }; // for   
             
-                                    
+            _onSuccess && _onSuccess();
+                   
         },
 
         onError: function( conn ) {
