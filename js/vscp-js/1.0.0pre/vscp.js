@@ -414,7 +414,6 @@ vscp.b64EncodeUnicode = function(str) {
  * @return {string} Unicode string
  */
 vscp.b64DecodeUnicode = function(str) {
-    console.log("str=[" + str + "]");
     return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));

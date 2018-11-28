@@ -109,10 +109,15 @@ vscp.user.fetchUsers = function ( onSuccessEx, onErrorEx ) {
                     onSuccess: function( conn, options ) {  
                         
                         // Add to array
+                        console.log(options.value);
                         var items = options.value.split(";");
                         vscp.user.userinfo.push( items );
-                        var dd =  options.name.split("."); 
+                        var dd =  options.name.split(".");
                         
+                        console.log( options, dd[1], count);
+                        if ( dd[1] == count ) {
+                            onSuccess && _onSuccess();
+                        }
                     },
 
                     onError: function( conn ) {
@@ -120,9 +125,7 @@ vscp.user.fetchUsers = function ( onSuccessEx, onErrorEx ) {
                     }
                 }); 
 
-            }; // for   
-            
-            _onSuccess && _onSuccess();
+            }; // for               
                    
         },
 
